@@ -1,0 +1,164 @@
+/* ==========================================
+   MAIN CSS ENTRY POINT
+   Import all CSS files in correct order
+   ========================================== */
+
+/* 1. Reset & Base Styles */
+@import './assets/styles/reset.css';
+
+/* 2. CSS Variables (Design System) */
+@import './assets/styles/variables.css';
+
+/* 3. Typography */
+@import './assets/styles/typography.css';
+
+/* 4. Layout System */
+@import './assets/styles/layout.css';
+
+/* 5. Utility Classes */
+@import './assets/styles/utilities.css';
+
+/* 6. Animations & Transitions */
+@import './assets/styles/animations.css';
+
+/* ==========================================
+   GLOBAL STYLES
+   ========================================== */
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Body defaults */
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove default button styles */
+button {
+  font-family: inherit;
+}
+
+/* Root app container */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================
+   SCROLLBAR STYLING
+   ========================================== */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-400) var(--gray-100);
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-400);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500);
+}
+
+/* ==========================================
+   SELECTION STYLING
+   ========================================== */
+
+::selection {
+  background-color: var(--primary-lightest);
+  color: var(--primary-dark);
+}
+
+::-moz-selection {
+  background-color: var(--primary-lightest);
+  color: var(--primary-dark);
+}
+
+/* ==========================================
+   FOCUS VISIBLE (Accessibility)
+   ========================================== */
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ==========================================
+   REDUCED MOTION (Accessibility)
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================
+   HIGH CONTRAST MODE (Accessibility)
+   ========================================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --primary-color: #0000ff;
+    --text-primary: #000000;
+    --bg-primary: #ffffff;
+    --border-color: #000000;
+  }
+}
+
+/* ==========================================
+   DARK MODE SUPPORT (Future)
+   ========================================== */
+
+@media (prefers-color-scheme: dark) {
+  /* Dark mode variables will be added here in future */
+  /* Currently using light mode only */
+}
