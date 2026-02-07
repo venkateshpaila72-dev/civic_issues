@@ -141,14 +141,24 @@ const validateUploadedFiles = (req, res, next) => {
  * At least one image required (reports)
  */
 const requireImages = (req, res, next) => {
-  if (!req.files || !req.files.images || req.files.images.length === 0) {
-    throw new AppError(
-      ERROR_MESSAGES.MEDIA_REQUIRED,
-      HTTP_STATUS.BAD_REQUEST
-    );
+  try {
+    const images = req.files?.images;
+
+    if (!Array.isArray(images) || images.length === 0) {
+      return next(
+        new AppError(
+          ERROR_MESSAGES.MEDIA_REQUIRED,
+          HTTP_STATUS.BAD_REQUEST
+        )
+      );
+    }
+
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 };
+
 
 /**
  * =====================================================

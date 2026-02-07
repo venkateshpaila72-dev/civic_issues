@@ -84,10 +84,8 @@ router.post(
   uploadMultiple,
   handleMulterError,
   validateUploadedFiles,
-
-  rebuildMultipartFields, 
-
   requireImages,
+  rebuildMultipartFields, 
   createReportValidation,
   validate,
   asyncHandler(createReport)

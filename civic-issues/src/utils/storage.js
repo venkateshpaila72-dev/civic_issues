@@ -1,11 +1,7 @@
 import { STORAGE_KEYS } from '../constants/routes';
 
-/* ─── Generic get / set / remove ─── */
+/* ─── Generic helpers (JSON only) ─── */
 
-/**
- * Read a JSON value from localStorage.
- * Returns null on miss or parse failure.
- */
 export const getItem = (key) => {
   try {
     const raw = localStorage.getItem(key);
@@ -15,9 +11,6 @@ export const getItem = (key) => {
   }
 };
 
-/**
- * Write a value to localStorage as JSON.
- */
 export const setItem = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
@@ -26,9 +19,6 @@ export const setItem = (key, value) => {
   }
 };
 
-/**
- * Remove a single key.
- */
 export const removeItem = (key) => {
   try {
     localStorage.removeItem(key);
@@ -37,24 +27,41 @@ export const removeItem = (key) => {
   }
 };
 
-/* ─── App-specific helpers ─── */
+/* ─── TOKEN (RAW STRING — NOT JSON) ─── */
 
-export const getToken        = ()      => getItem(STORAGE_KEYS.TOKEN);
-export const setToken        = (token) => setItem(STORAGE_KEYS.TOKEN, token);
-export const removeToken     = ()      => removeItem(STORAGE_KEYS.TOKEN);
+export const getToken = () => {
+  return localStorage.getItem(STORAGE_KEYS.TOKEN);
+};
 
-export const getUser         = ()      => getItem(STORAGE_KEYS.USER);
-export const setUser         = (user)  => setItem(STORAGE_KEYS.USER, user);
-export const removeUser      = ()      => removeItem(STORAGE_KEYS.USER);
+export const setToken = (token) => {
+  if (typeof token === 'string') {
+    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+  }
+};
 
-export const getSelectedDept = ()      => getItem(STORAGE_KEYS.SELECTED_DEPT);
-export const setSelectedDept = (id)    => setItem(STORAGE_KEYS.SELECTED_DEPT, id);
-export const removeSelectedDept = ()   => removeItem(STORAGE_KEYS.SELECTED_DEPT);
+export const removeToken = () => {
+  localStorage.removeItem(STORAGE_KEYS.TOKEN);
+};
 
-export const getTheme        = ()      => getItem(STORAGE_KEYS.THEME) || 'light';
-export const setTheme        = (t)     => setItem(STORAGE_KEYS.THEME, t);
+/* ─── USER (JSON) ─── */
 
-/** Wipe everything the app wrote — used on logout */
+export const getUser = () => getItem(STORAGE_KEYS.USER);
+export const setUser = (user) => setItem(STORAGE_KEYS.USER, user);
+export const removeUser = () => removeItem(STORAGE_KEYS.USER);
+
+/* ─── SELECTED DEPARTMENT ─── */
+
+export const getSelectedDept = () => getItem(STORAGE_KEYS.SELECTED_DEPT);
+export const setSelectedDept = (id) => setItem(STORAGE_KEYS.SELECTED_DEPT, id);
+export const removeSelectedDept = () => removeItem(STORAGE_KEYS.SELECTED_DEPT);
+
+/* ─── THEME ─── */
+
+export const getTheme = () => getItem(STORAGE_KEYS.THEME) || 'light';
+export const setTheme = (t) => setItem(STORAGE_KEYS.THEME, t);
+
+/* ─── CLEAR ALL ON LOGOUT ─── */
+
 export const clearAll = () => {
   removeToken();
   removeUser();
