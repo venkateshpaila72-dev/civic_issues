@@ -283,82 +283,69 @@ const getReportStatistics = async (req, res, next) => {
   }
 };
 
+
 /**
- * @desc    Get nearby reports (geospatial query)
- * @route   GET /api/reports/nearby
- * @access  Private (All roles)
+ * Get nearby reports (geospatial query)
+ * GET /api/reports/nearby?lat=17.385&lng=78.487&radius=5000
  */
-const getNearbyReports = async (req, res, next) => {
+const getNearbyReports = async (req, res) => {
   try {
-    const { longitude, latitude, maxDistance = 5000 } = req.query;
+    const { lat, lng, radius = 5000 } = req.query;
 
-    if (!longitude || !latitude) {
-      throw new AppError(
-        'Longitude and latitude are required',
-        HTTP_STATUS.BAD_REQUEST
-      );
+    // Validate coordinates
+    if (!lat || !lng) {
+      return res.status(400).json({
+        success: false,
+        message: 'Latitude and longitude are required',
+      });
     }
 
-    const lng = parseFloat(longitude);
-    const lat = parseFloat(latitude);
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+    const searchRadius = parseInt(radius);
 
-    if (isNaN(lng) || isNaN(lat)) {
-      throw new AppError(
-        'Invalid coordinates',
-        HTTP_STATUS.BAD_REQUEST
-      );
+    // Validate parsed values
+    if (isNaN(latitude) || isNaN(longitude) || isNaN(searchRadius)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid coordinates or radius',
+      });
     }
 
-    // Build base filter
-    let filter = { isDeleted: false };
-
-    // Role-based filtering
-    const userRole = req.user.role;
-
-    if (userRole === USER_ROLES.CITIZEN) {
-      filter.citizen = req.user._id;
-    } else if (userRole === USER_ROLES.OFFICER) {
-      if (req.user.assignedDepartments && req.user.assignedDepartments.length > 0) {
-        filter.department = { $in: req.user.assignedDepartments };
-      } else {
-        return res.status(HTTP_STATUS.OK).json({
-          success: true,
-          data: { reports: [] },
-        });
-      }
-    }
-
-    // Geospatial query
+    // MongoDB geospatial query
     const reports = await Report.find({
-      ...filter,
       'location.coordinates': {
         $near: {
           $geometry: {
             type: 'Point',
-            coordinates: [lng, lat],
+            coordinates: [longitude, latitude], // [lng, lat] format
           },
-          $maxDistance: parseInt(maxDistance), // in meters
+          $maxDistance: searchRadius, // in meters
         },
       },
+      isDeleted: false,
     })
       .populate('citizen', 'fullName email')
       .populate('department', 'name code')
-      .limit(20);
+      .populate('assignedOfficer', 'fullName badgeNumber')
+      .select('-__v')
+      .limit(50)
+      .sort('-createdAt');
 
-    res.status(HTTP_STATUS.OK).json({
+    res.status(200).json({
       success: true,
+      count: reports.length,
       data: {
         reports,
-        searchCenter: {
-          longitude: lng,
-          latitude: lat,
-        },
-        maxDistance: parseInt(maxDistance),
       },
     });
   } catch (error) {
-    logger.error(`Get nearby reports error: ${error.message}`);
-    next(error);
+    console.error('Get nearby reports error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch nearby reports',
+      error: error.message,
+    });
   }
 };
 

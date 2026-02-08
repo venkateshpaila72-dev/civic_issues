@@ -9,7 +9,7 @@ const useGeolocation = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const getLocation = () => {
+  const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser');
       return;
@@ -58,7 +58,7 @@ const useGeolocation = () => {
     location,
     loading,
     error,
-    getLocation,
+    getCurrentLocation,
   };
 };
 

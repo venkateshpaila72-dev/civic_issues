@@ -1,11 +1,36 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useDepartmentContext } from '../context/DepartmentContext';
 import Header from '../components/layout/Header';
 import Sidebar from '../components/layout/Sidebar';
+import Loader from '../components/common/Loader';
 import { OFFICER_ROUTES } from '../constants/routes';
 
 const OfficerLayout = () => {
+  const navigate = useNavigate();
+  const { hasSelectedDepartment, loading } = useDepartmentContext();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Redirect to department selection if not selected
+  useEffect(() => {
+    if (!loading && !hasSelectedDepartment) {
+      navigate('/officer/select-department', { replace: true });
+    }
+  }, [hasSelectedDepartment, loading, navigate]);
+
+  // Show loader while checking department
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader size="lg" />
+      </div>
+    );
+  }
+
+  // Don't render if no department (will redirect)
+  if (!hasSelectedDepartment) {
+    return null;
+  }
 
   const menuItems = [
     {

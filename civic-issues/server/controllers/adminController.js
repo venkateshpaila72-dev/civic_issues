@@ -2,11 +2,13 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Department = require('../models/Department');
 const Report = require('../models/Report');
+const Emergency = require('../models/Emergency');
 const {
   HTTP_STATUS,
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
   USER_ROLES,
+  REPORT_STATUS,
 } = require('../utils/constants');
 const { sanitizeUser } = require('../utils/helpers');
 const logger = require('../utils/logger');
@@ -186,7 +188,7 @@ const getOfficerById = async (req, res, next) => {
 const updateOfficer = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { fullName, phoneNumber, email } = req.body;
+    const { fullName, phoneNumber, email, departments } = req.body;
 
     const officer = await User.findById(id);
 
@@ -197,7 +199,10 @@ const updateOfficer = async (req, res, next) => {
       );
     }
 
-    // Check if new email already exists
+    // ─── Basic fields ───
+    if (fullName) officer.fullName = fullName;
+    if (phoneNumber !== undefined) officer.phoneNumber = phoneNumber;
+
     if (email && email !== officer.email) {
       const existingUser = await User.findByEmail(email);
       if (existingUser) {
@@ -209,18 +214,49 @@ const updateOfficer = async (req, res, next) => {
       officer.email = email.toLowerCase();
     }
 
-    // Update fields
-    if (fullName) officer.fullName = fullName;
-    if (phoneNumber !== undefined) officer.phoneNumber = phoneNumber;
+    // ─── Departments sync ───
+    if (Array.isArray(departments)) {
+      const current = officer.assignedDepartments.map((d) => d.toString());
+      const incoming = departments.map((d) => d.toString());
+
+      const toAdd = incoming.filter((d) => !current.includes(d));
+      const toRemove = current.filter((d) => !incoming.includes(d));
+
+      // Validate & add
+      for (const deptId of toAdd) {
+        const dept = await Department.findById(deptId);
+        if (!dept || dept.isDeleted) {
+          throw new AppError(
+            `Department ${deptId} not found`,
+            HTTP_STATUS.NOT_FOUND
+          );
+        }
+        officer.assignedDepartments.push(deptId);
+        dept.stats.assignedOfficers += 1;
+        await dept.save();
+      }
+
+      // Remove
+      for (const deptId of toRemove) {
+        officer.assignedDepartments = officer.assignedDepartments.filter(
+          (d) => d.toString() !== deptId
+        );
+
+        const dept = await Department.findById(deptId);
+        if (dept) {
+          dept.stats.assignedOfficers = Math.max(
+            0,
+            dept.stats.assignedOfficers - 1
+          );
+          await dept.save();
+        }
+      }
+    }
 
     await officer.save();
 
-    logger.success(`Officer updated: ${officer.email} by ${req.user.email}`);
-
-    const populatedOfficer = await User.findById(officer._id).populate(
-      'assignedDepartments',
-      'name code'
-    );
+    const populatedOfficer = await User.findById(officer._id)
+      .populate('assignedDepartments', 'name code');
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
@@ -234,6 +270,7 @@ const updateOfficer = async (req, res, next) => {
     next(error);
   }
 };
+
 
 /**
  * @desc    Update officer account status
@@ -510,6 +547,65 @@ const deleteOfficer = async (req, res, next) => {
   }
 };
 
+//admin dashboard stats, department management, and emergency oversight controllers would go here (not implemented in this snippet)
+
+const getAdminDashboard = async (req, res) => {
+  const [
+    totalDepartments,
+    activeDepartments,
+    totalOfficers,
+    activeOfficers,
+    totalReports,
+    pendingReports,
+    resolvedReports,
+    totalEmergencies,
+    activeEmergencies,
+  ] = await Promise.all([
+    Department.countDocuments({ isDeleted: false }),
+    Department.countDocuments({ isDeleted: false, isActive: true }),
+
+    User.countDocuments({ role: USER_ROLES.OFFICER, isDeleted: false }),
+    User.countDocuments({
+      role: USER_ROLES.OFFICER,
+      isDeleted: false,
+      accountStatus: 'active',
+    }),
+
+    Report.countDocuments({ isDeleted: false }),
+    Report.countDocuments({ isDeleted: false, status: REPORT_STATUS.SUBMITTED }),
+    Report.countDocuments({ isDeleted: false, status: REPORT_STATUS.RESOLVED }),
+
+    Emergency.countDocuments({ isDeleted: false }),
+    Emergency.countDocuments({
+      isDeleted: false,
+      status: { $ne: 'resolved' },
+    }),
+  ]);
+
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    data: {
+      departments: {
+        total: totalDepartments,
+        active: activeDepartments,
+      },
+      officers: {
+        total: totalOfficers,
+        active: activeOfficers,
+      },
+      reports: {
+        total: totalReports,
+        pending: pendingReports,
+        resolved: resolvedReports,
+      },
+      emergencies: {
+        total: totalEmergencies,
+        active: activeEmergencies,
+      },
+    },
+  });
+};
+
 module.exports = {
   createOfficer,
   getAllOfficers,
@@ -520,4 +616,5 @@ module.exports = {
   removeDepartment,
   getAllReports,
   deleteOfficer,
+  getAdminDashboard,
 };

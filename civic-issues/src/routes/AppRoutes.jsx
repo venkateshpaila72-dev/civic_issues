@@ -35,9 +35,30 @@ const CreateReportPage = lazy(() => import('../pages/citizen/CreateReportPage'))
 // Citizen pages (Phase 6)
 const MyReportsPage = lazy(() => import('../pages/citizen/MyReportsPage'));
 const ReportDetailsPage = lazy(() => import('../pages/citizen/ReportDetailsPage'));
+const MyEmergenciesPage = lazy(() => import('../pages/citizen/MyEmergenciesPage'));
+const NearbyReportsPage = lazy(() => import('../pages/citizen/NearbyReportsPage'));
+
+// Officer pages (Phase 7)
+const SelectDepartmentPage = lazy(() => import('../pages/officer/SelectDepartmentPage'));
+const OfficerDashboardPage = lazy(() => import('../pages/officer/OfficerDashboardPage'));
+const OfficerReportsPage = lazy(() => import('../pages/officer/OfficerReportsPage'));
+const OfficerReportDetailsPage = lazy(() => import('../pages/officer/OfficerReportDetailsPage'));
+const OfficerProfilePage = lazy(() => import('../pages/officer/OfficerProfilePage'));
+
+// Admin pages (Phase 8)
+const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'));
+const DepartmentManagementPage = lazy(() => import('../pages/admin/DepartmentManagementPage'));
+const OfficerManagementPage = lazy(() => import('../pages/admin/OfficerManagementPage'));
+const ReportsAuditPage = lazy(() => import('../pages/admin/ReportsAuditPage'));
+const EmergencyOversightPage = lazy(() => import('../pages/admin/EmergencyOversightPage'));
+
+// Public pages (Phase 9)
+const LandingPage = lazy(() => import('../pages/public/LandingPage'));
 
 /* ─── Layouts ─── */
 import CitizenLayout from '../layouts/CitizenLayout';
+import OfficerLayout from '../layouts/OfficerLayout';
+import AdminLayout from '../layouts/AdminLayout';
 
 /* ─── Loading fallback ─── */
 const PageLoader = () => (
@@ -52,8 +73,7 @@ const AppRoutes = () => {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* ─── Public routes ─── */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          {/* Temporary redirect to login; will change to LandingPage in Phase 9 */}
+          <Route path="/" element={<LandingPage />} />
 
           {/* ─── Auth routes ─── */}
           <Route element={<AuthLayout />}>
@@ -76,14 +96,40 @@ const AppRoutes = () => {
             <Route path="/citizen/reports" element={<MyReportsPage />} />
             <Route path="/citizen/reports/create" element={<CreateReportPage />} />
             <Route path="/citizen/reports/:id" element={<ReportDetailsPage />} />
-            {/* Phase 6: Emergencies and nearby reports will be added next */}
+            <Route path="/citizen/emergencies" element={<MyEmergenciesPage />} />
+            <Route path="/citizen/nearby" element={<NearbyReportsPage />} />
           </Route>
 
           {/* ─── Officer routes (Phase 7) ─── */}
-          {/* Will be added in Phase 7 */}
+          {/* Department selection (must be first, no layout) */}
+          <Route
+            path="/officer/select-department"
+            element={
+              <ProtectedRoute>
+                <RoleBasedRoute allowedRoles={USER_ROLES.OFFICER}>
+                  <SelectDepartmentPage />
+                </RoleBasedRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Officer dashboard routes (require department selection) */}
+          <Route element={<ProtectedRoute><RoleBasedRoute allowedRoles={USER_ROLES.OFFICER}><OfficerLayout /></RoleBasedRoute></ProtectedRoute>}>
+            <Route path="/officer/dashboard" element={<OfficerDashboardPage />} />
+            <Route path="/officer/reports" element={<OfficerReportsPage />} />
+            <Route path="/officer/reports/:id" element={<OfficerReportDetailsPage />} />
+            <Route path="/officer/profile" element={<OfficerProfilePage />} />
+            {/* Phase 7: Emergencies and statistics will be added next */}
+          </Route>
 
           {/* ─── Admin routes (Phase 8) ─── */}
-          {/* Will be added in Phase 8 */}
+          <Route element={<ProtectedRoute><RoleBasedRoute allowedRoles={USER_ROLES.ADMIN}><AdminLayout /></RoleBasedRoute></ProtectedRoute>}>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/departments" element={<DepartmentManagementPage />} />
+            <Route path="/admin/officers" element={<OfficerManagementPage />} />
+            <Route path="/admin/reports" element={<ReportsAuditPage />} />
+            <Route path="/admin/emergencies" element={<EmergencyOversightPage />} />
+          </Route>
 
           {/* ─── Catch-all 404 ─── */}
           <Route path="*" element={<NotFoundPage />} />

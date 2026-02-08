@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { getAllReports } from '../../api/services/adminService';
+import { getOfficerReports } from '../../api/services/officerService';
 import { getErrorMessage } from '../../utils/errorHandler';
 import PageContainer from '../../components/layout/PageContainer';
-import ReportList from '../../components/citizen/ReportList';
 import ReportFilter from '../../components/citizen/ReportFilter';
+import ReportList from '../../components/citizen/ReportList';
 import Pagination from '../../components/common/Pagination';
 import Alert from '../../components/common/Alert';
 
-const ReportsAuditPage = () => {
+const OfficerReportsPage = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ const ReportsAuditPage = () => {
         ...filters,
       };
 
-      const response = await getAllReports(params);
+      const response = await getOfficerReports(params);
 
       if (response?.success && response?.data) {
         setReports(response.data.reports || []);
@@ -63,8 +63,8 @@ const ReportsAuditPage = () => {
 
   return (
     <PageContainer
-      title="Reports Audit"
-      subtitle={`${pagination.total || 0} total report${pagination.total !== 1 ? 's' : ''} across all departments`}
+      title="Department Reports"
+      subtitle={`${pagination.total || 0} total report${pagination.total !== 1 ? 's' : ''}`}
     >
       {error && (
         <Alert type="error" className="mb-6">
@@ -96,4 +96,4 @@ const ReportsAuditPage = () => {
   );
 };
 
-export default ReportsAuditPage;
+export default OfficerReportsPage;

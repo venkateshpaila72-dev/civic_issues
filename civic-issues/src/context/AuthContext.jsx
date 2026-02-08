@@ -13,23 +13,38 @@ export const AuthProvider = ({ children }) => {
 
   /* ─── Initialize from localStorage ─── */
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       const token = getToken();
-      const savedUser = getUser();
 
-      if (token && savedUser) {
-        setUserState(savedUser);
-        setIsAuthenticated(true);
+      if (!token) {
+        setLoading(false);
+        return;
       }
 
-      setLoading(false);
+      try {
+        const { data } = await api.get(AUTH.ME);
+
+        if (data?.success && data?.data?.user) {
+          setUserState(data.data.user);
+          setIsAuthenticated(true);
+          setUser(data.data.user); // sync storage
+        } else {
+          clearAll();
+        }
+      } catch (err) {
+        clearAll();
+      } finally {
+        setLoading(false);
+      }
     };
 
     initAuth();
   }, []);
 
+
   /* ─── Login ─── */
   const login = (token, userData) => {
+    clearAll();
     setToken(token);
     setUser(userData);
     setUserState(userData);
@@ -37,17 +52,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   /* ─── Logout ─── */
-  const logout = async () => {
+  const logout = async (navigate) => {
     try {
-      // Call backend logout endpoint (clears any server-side session if needed)
       await api.post(AUTH.LOGOUT);
     } catch (error) {
-      // Even if backend call fails, wipe client state
       console.error('Logout API error:', error);
     } finally {
       clearAll();
       setUserState(null);
       setIsAuthenticated(false);
+
+      // 🔥 force route reset
+      navigate('/login', { replace: true });
     }
   };
 

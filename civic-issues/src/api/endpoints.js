@@ -33,6 +33,7 @@ export const ADMIN = {
   ASSIGN_DEPARTMENT:        (officerId)      => `/admin/officers/${officerId}/departments`,                        // POST
   REMOVE_DEPARTMENT:        (officerId, deptId) => `/admin/officers/${officerId}/departments/${deptId}`,           // DELETE
   AUDIT_REPORTS:            '/admin/reports',                                         // GET
+  DASHBOARD:                '/admin/dashboard',
 };
 
 /* ── Officer  (9) ── */
@@ -72,6 +73,8 @@ export const REPORTS = {
   STATISTICS: '/reports/statistics',         // GET
   NEARBY:     '/reports/nearby',            // GET   (lat, lng, radius)
 };
+
+
 
 /* ── Health ── */
 export const HEALTH = '/health';

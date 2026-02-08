@@ -19,6 +19,7 @@ const RoleBasedRoute = ({ children, allowedRoles }) => {
 
   // Check if user's role is in the allowed list
   if (!hasRole(user, allowedRoles)) {
+    console.warn('Role mismatch',user.role, allowedRoles);
     return <Navigate to="/unauthorized" replace />;
   }
 

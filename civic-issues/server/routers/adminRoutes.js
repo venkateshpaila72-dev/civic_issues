@@ -12,6 +12,7 @@ const {
   removeDepartment,
   getAllReports,
   deleteOfficer,
+  getAdminDashboard,
 } = require('../controllers/adminController');
 
 // Middleware
@@ -163,5 +164,13 @@ router.get(
   isAdmin,
   asyncHandler(getAllReports)
 );
+
+router.get(
+  '/dashboard',
+  authenticate,
+  isAdmin,
+  getAdminDashboard
+);
+
 
 module.exports = router;

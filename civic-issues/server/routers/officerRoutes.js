@@ -100,6 +100,7 @@ router.get(
   '/reports/:id',
   authenticate,
   isOfficer,
+  validateDepartmentSelection,
   mongoIdValidation,
   validate,
   asyncHandler(getReportById)

@@ -66,7 +66,6 @@ const LocationMap = ({ location, className = '' }) => {
         </div>
       )}
     </div>
-  );
-};
+  );};
 
 export default LocationMap;

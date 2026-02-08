@@ -18,6 +18,7 @@ const {
   validate,
 } = require('../utils/validators');
 
+
 /**
  * =====================================================
  * REPORT STATISTICS (OFFICER/ADMIN ONLY)
@@ -69,6 +70,7 @@ router.get(
   authenticate,
   asyncHandler(getAllReports)
 );
+
 
 /**
  * @route   GET /api/reports/:id

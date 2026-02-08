@@ -65,5 +65,4 @@ export const setTheme = (t) => setItem(STORAGE_KEYS.THEME, t);
 export const clearAll = () => {
   removeToken();
   removeUser();
-  removeSelectedDept();
 };

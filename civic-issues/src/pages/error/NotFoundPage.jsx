@@ -1,8 +1,35 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
 import Button from '../../components/common/Button';
+import { USER_ROLES } from '../../constants/roles';
 
 const NotFoundPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGoHome = () => {
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
+    // Redirect to appropriate dashboard based on role
+    switch (user.role) {
+      case USER_ROLES.CITIZEN:
+        navigate('/citizen/dashboard');
+        break;
+      case USER_ROLES.OFFICER:
+        navigate('/officer/dashboard');
+        break;
+      case USER_ROLES.ADMIN:
+        navigate('/admin/dashboard');
+        break;
+      default:
+        navigate('/');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
       <div className="text-center">
@@ -12,9 +39,9 @@ const NotFoundPage = () => {
           The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="mt-8">
-          <Link to="/">
-            <Button variant="primary">Go back home</Button>
-          </Link>
+          <Button variant="primary" onClick={handleGoHome}>
+            Go back home
+          </Button>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ export const register = async (credentials) => {
 /* ─── Login (manual with email+password) ─── */
 export const login = async (credentials) => {
   const { data } = await api.post(AUTH.LOGIN, credentials);
+  
   return data;
 };
 

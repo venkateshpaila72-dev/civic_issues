@@ -27,7 +27,7 @@ const LocationPicker = ({ value, onChange, error }) => {
   const [address, setAddress] = useState('');
   const [loadingAddress, setLoadingAddress] = useState(false);
 
-  const { location: gpsLocation, loading: gpsLoading, error: gpsError, getLocation } = useGeolocation();
+  const { location: gpsLocation, loading: gpsLoading, error: gpsError, getCurrentLocation } = useGeolocation();
 
   // When GPS location is obtained, use it
   useEffect(() => {
@@ -73,7 +73,7 @@ const LocationPicker = ({ value, onChange, error }) => {
           type="button"
           variant="secondary"
           size="sm"
-          onClick={getLocation}
+          onClick={getCurrentLocation}
           loading={gpsLoading}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

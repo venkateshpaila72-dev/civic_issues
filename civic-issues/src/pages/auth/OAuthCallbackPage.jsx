@@ -2,14 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { extractOAuthToken, getCurrentUser } from '../../api/services/authService';
+import { STORAGE_KEYS } from '../../constants/routes';
 import Loader from '../../components/common/Loader';
 import ErrorMessage from '../../components/common/ErrorMessage';
 
-/**
- * After Google OAuth, backend redirects to:
- *   /oauth-success?token=JWT_TOKEN
- * This page extracts the token, fetches user data, logs in, and redirects.
- */
 const OAuthCallbackPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -18,31 +14,41 @@ const OAuthCallbackPage = () => {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        // Extract token from URL
+        // 1️⃣ Extract token
         const token = extractOAuthToken();
 
         if (!token) {
-          setError('No authentication token received. Please try again.');
-          setTimeout(() => navigate('/login'), 3000);
-          return;
+          throw new Error('No authentication token received');
         }
 
-        // Store token temporarily so axios interceptor can use it
-        localStorage.setItem('civic_token', token);
+        // 2️⃣ SAVE TOKEN (before any API call)
+        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
 
-        // Fetch user data
-        const response = await getCurrentUser();
+        // 3️⃣ Fetch user (axios interceptor now works)
+        const res = await getCurrentUser();
 
-        if (response?.success && response?.data?.user) {
-          login(token, response.data.user);
-          navigate('/citizen/dashboard', { replace: true });
-        } else {
+        const user = res?.data?.user;
+        if (!user) {
           throw new Error('Failed to fetch user data');
         }
+
+        // 4️⃣ Save user via auth context
+        login(token, user);
+
+        // 5️⃣ Redirect by role
+        if (user.role === 'admin') {
+          navigate('/admin/dashboard', { replace: true });
+        } else if (user.role === 'officer') {
+          navigate('/officer/select-department', { replace: true });
+        } else {
+          navigate('/citizen/dashboard', { replace: true });
+        }
+
       } catch (err) {
         console.error('OAuth callback error:', err);
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
         setError('Authentication failed. Redirecting to login...');
-        localStorage.removeItem('civic_token');
         setTimeout(() => navigate('/login'), 3000);
       }
     };
