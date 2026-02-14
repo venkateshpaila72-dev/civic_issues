@@ -1,10 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getMyEmergencies } from '../../api/services/emergencyService';
+import { getOfficerEmergencies } from '../../api/services/officerService';
 import { getErrorMessage } from '../../utils/errorHandler';
-import { CITIZEN_ROUTES } from '../../constants/routes';
 import PageContainer from '../../components/layout/PageContainer';
-import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import Loader from '../../components/common/Loader';
 import EmptyState from '../../components/common/EmptyState';
@@ -12,8 +9,7 @@ import Badge from '../../components/common/Badge';
 import { EMERGENCY_STATUS_META } from '../../constants/emergencyTypes';
 import { timeAgo } from '../../utils/formatters';
 
-const MyEmergenciesPage = () => {
-  const navigate = useNavigate();
+const OfficerEmergenciesPage = () => {
   const [emergencies, setEmergencies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,7 +18,7 @@ const MyEmergenciesPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getMyEmergencies();
+      const response = await getOfficerEmergencies();
 
       if (response?.success && response?.data?.emergencies) {
         setEmergencies(response.data.emergencies);
@@ -52,19 +48,8 @@ const MyEmergenciesPage = () => {
 
   return (
     <PageContainer
-      title="My Emergencies"
-      subtitle={`${emergencies.length} emergency report${emergencies.length !== 1 ? 's' : ''}`}
-      actions={
-        <Button
-          variant="danger"
-          onClick={() => navigate(CITIZEN_ROUTES.CREATE_EMERGENCY)}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          Report Emergency
-        </Button>
-      }
+      title="Active Emergencies"
+      subtitle={`${emergencies.length} active emergenc${emergencies.length !== 1 ? 'ies' : 'y'}`}
     >
       {error && (
         <Alert type="error" className="mb-6">
@@ -74,8 +59,8 @@ const MyEmergenciesPage = () => {
 
       {emergencies.length === 0 ? (
         <EmptyState
-          title="No emergencies reported"
-          message="You haven't reported any emergencies. Click the button above to report an emergency if you need immediate assistance."
+          title="No active emergencies"
+          message="All emergencies have been resolved or there are no emergencies to display"
         />
       ) : (
         <div className="space-y-4">
@@ -92,15 +77,12 @@ const MyEmergenciesPage = () => {
                       </Badge>
                       <Badge variant="purple">{emergency.type}</Badge>
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-1">{emergency.title}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-1">{emergency.title || 'Emergency Report'}</h3>
                     <p className="text-gray-700">{emergency.description}</p>
                   </div>
 
                   <div className="flex-shrink-0 text-right">
                     <p className="text-sm text-gray-500">{timeAgo(emergency.createdAt)}</p>
-                    {emergency.emergencyId && (
-                      <p className="text-xs text-gray-400 mt-1">{emergency.emergencyId}</p>
-                    )}
                   </div>
                 </div>
 
@@ -110,29 +92,35 @@ const MyEmergenciesPage = () => {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     </svg>
-                    <span className="truncate">{emergency.location.address}</span>
+                    {emergency.location.address}
                   </div>
                 )}
 
-                {/* Contact Number */}
-                <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                  {emergency.contactNumber}
-                </div>
+                {/* Contact & Citizen Info */}
+                <div className="flex items-center gap-4 pt-3 border-t border-gray-100 text-sm">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Citizen: {emergency.reportedBy?.fullName || 'Unknown'}</span>
+                  </div>
 
-                {/* Responding Officer */}
-                {emergency.respondedBy && (
-                  <div className="pt-3 border-t border-gray-100">
-                    <div className="flex items-center gap-2 text-sm text-blue-600">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span>{emergency.contactNumber}</span>
+                  </div>
+
+                  {emergency.respondingOfficer && (
+                    <div className="flex items-center gap-2 text-blue-600">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                       </svg>
-                      <span>Responding Officer: {emergency.respondedBy.fullName}</span>
+                      <span>Responding: {emergency.respondingOfficer.fullName}</span>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             );
           })}
@@ -142,4 +130,4 @@ const MyEmergenciesPage = () => {
   );
 };
 
-export default MyEmergenciesPage;
+export default OfficerEmergenciesPage;

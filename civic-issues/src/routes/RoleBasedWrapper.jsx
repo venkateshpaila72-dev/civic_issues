@@ -1,10 +1,10 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import { hasRole } from '../utils/permissions';
 import Loader from '../components/common/Loader';
 
-const RoleBasedRoute = ({ allowedRoles }) => {
+const RoleBasedWrapper = ({ allowedRoles, children }) => {
   const { user, isAuthenticated, loading } = useAuth();
 
   if (loading) {
@@ -20,11 +20,10 @@ const RoleBasedRoute = ({ allowedRoles }) => {
   }
 
   if (!hasRole(user, allowedRoles)) {
-    console.warn('Role mismatch', user.role, allowedRoles);
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Outlet />;
+  return children; // ✅ correct here
 };
 
-export default RoleBasedRoute;
+export default RoleBasedWrapper;

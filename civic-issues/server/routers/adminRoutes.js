@@ -11,6 +11,7 @@ const {
   assignDepartment,
   removeDepartment,
   getAllReports,
+  getAllEmergencies,
   deleteOfficer,
   getAdminDashboard,
 } = require('../controllers/adminController');
@@ -154,6 +155,18 @@ router.delete(
  */
 
 /**
+ * @route   GET /api/admin/dashboard
+ * @desc    Get admin dashboard stats
+ * @access  Private/Admin
+ */
+router.get(
+  '/dashboard',
+  authenticate,
+  isAdmin,
+  asyncHandler(getAdminDashboard)
+);
+
+/**
  * @route   GET /api/admin/reports
  * @desc    Get all reports (audit view)
  * @access  Private/Admin
@@ -165,12 +178,16 @@ router.get(
   asyncHandler(getAllReports)
 );
 
+/**
+ * @route   GET /api/admin/emergencies
+ * @desc    Get all emergencies (oversight view)
+ * @access  Private/Admin
+ */
 router.get(
-  '/dashboard',
+  '/emergencies',
   authenticate,
   isAdmin,
-  getAdminDashboard
+  asyncHandler(getAllEmergencies)
 );
-
 
 module.exports = router;

@@ -295,12 +295,12 @@ const updateOfficerStatus = async (req, res, next) => {
     await officer.save();
 
     logger.success(
-      `Officer status updated to ${accountStatus}: ${officer.email} by ${req.user.email}`
+      `Officer ${officer.email} status updated to ${accountStatus} by ${req.user.email}`
     );
 
     res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: `Officer account ${accountStatus}`,
+      message: 'Officer status updated successfully',
       data: {
         officer: sanitizeUser(officer),
       },
@@ -501,6 +501,65 @@ const getAllReports = async (req, res, next) => {
 };
 
 /**
+ * @desc    Get all emergencies (admin oversight)
+ * @route   GET /api/admin/emergencies
+ * @access  Private/Admin
+ */
+const getAllEmergencies = async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, type, status, priority } = req.query;
+
+    // Build filter
+    const filter = {
+      isDeleted: false,
+    };
+
+    if (type) {
+      filter.type = type;
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (priority) {
+      filter.priority = priority;
+    }
+
+    // Pagination
+    const { skip, limit: limitNum } = getPagination(page, limit);
+
+    // Get emergencies
+    const emergencies = await Emergency.find(filter)
+      .populate('reportedBy', 'fullName email phoneNumber')
+      .populate('respondedBy', 'fullName email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    // Get total count
+    const total = await Emergency.countDocuments(filter);
+
+    // Pagination meta
+    const pagination = getPaginationMeta(total, parseInt(page), limitNum);
+
+    logger.info(`Admin ${req.user.email} fetched ${emergencies.length} emergencies`);
+
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: {
+        emergencies,
+        pagination,
+        total,
+      },
+    });
+  } catch (error) {
+    logger.error(`Get all emergencies error: ${error.message}`);
+    next(error);
+  }
+};
+
+/**
  * @desc    Delete officer (soft delete)
  * @route   DELETE /api/admin/officers/:id
  * @access  Private/Admin
@@ -547,8 +606,11 @@ const deleteOfficer = async (req, res, next) => {
   }
 };
 
-//admin dashboard stats, department management, and emergency oversight controllers would go here (not implemented in this snippet)
-
+/**
+ * @desc    Get admin dashboard stats
+ * @route   GET /api/admin/dashboard
+ * @access  Private/Admin
+ */
 const getAdminDashboard = async (req, res) => {
   const [
     totalDepartments,
@@ -615,6 +677,7 @@ module.exports = {
   assignDepartment,
   removeDepartment,
   getAllReports,
+  getAllEmergencies,
   deleteOfficer,
   getAdminDashboard,
 };

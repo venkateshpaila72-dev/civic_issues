@@ -52,20 +52,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   /* ─── Logout ─── */
-  const logout = async (navigate) => {
-    try {
-      await api.post(AUTH.LOGOUT);
-    } catch (error) {
-      console.error('Logout API error:', error);
-    } finally {
-      clearAll();
-      setUserState(null);
-      setIsAuthenticated(false);
-
-      // 🔥 force route reset
-      navigate('/login', { replace: true });
-    }
-  };
+const logout = async () => {
+  try {
+    await api.post(AUTH.LOGOUT);
+  } catch (error) {
+    console.error('Logout API error:', error);
+  } finally {
+    clearAll();
+    setUserState(null);
+    setIsAuthenticated(false);
+  }
+};
 
   /* ─── Update user (after profile edit) ─── */
   const updateUser = (updatedData) => {

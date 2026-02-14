@@ -67,6 +67,7 @@ export const routeConfig = {
       '/admin/officers/create',
       '/admin/officers/:id/edit',
       '/admin/reports',
+      '/admin/reports/:id',
       '/admin/emergencies',
     ],
   },

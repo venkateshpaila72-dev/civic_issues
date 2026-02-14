@@ -21,9 +21,13 @@ const SelectDepartmentPage = () => {
     const [selectedId, setSelectedId] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const assignedDepartments = departments.filter(dept =>
-        user?.assignedDepartments?.includes(dept._id)
-    );
+    const assignedDepartments = departments.filter((dept) =>
+  Array.isArray(user?.assignedDepartments)
+    ? user.assignedDepartments.some(
+        (d) => d === dept._id || d?._id === dept._id
+      )
+    : false
+);
 
 
     const handleSubmit = async () => {

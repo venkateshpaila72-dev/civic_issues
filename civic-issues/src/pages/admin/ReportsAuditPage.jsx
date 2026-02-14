@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { getAllReports } from '../../api/services/adminService';
 import { getErrorMessage } from '../../utils/errorHandler';
 import PageContainer from '../../components/layout/PageContainer';
-import ReportList from '../../components/citizen/ReportList';
+import AdminReportList from '../../components/admin/AdminReportList';
 import ReportFilter from '../../components/citizen/ReportFilter';
 import Pagination from '../../components/common/Pagination';
 import Alert from '../../components/common/Alert';
@@ -77,8 +77,8 @@ const ReportsAuditPage = () => {
         <ReportFilter filters={filters} onFilterChange={setFilter} />
       </div>
 
-      {/* Reports list */}
-      <ReportList reports={reports} loading={loading} />
+      {/* Reports list - CHANGED TO USE AdminReportList */}
+      <AdminReportList reports={reports} loading={loading} />
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (

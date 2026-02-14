@@ -18,13 +18,13 @@ const Header = ({ onMenuToggle }) => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   const profilePath = {
     [USER_ROLES.CITIZEN]: '/citizen/profile',
     [USER_ROLES.OFFICER]: '/officer/profile',
-    [USER_ROLES.ADMIN]:   '/admin/profile',
+    [USER_ROLES.ADMIN]: '/admin/profile',
   }[user?.role];
 
   return (

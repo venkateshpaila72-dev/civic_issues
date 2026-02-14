@@ -3,7 +3,7 @@ import { getOfficerReports } from '../../api/services/officerService';
 import { getErrorMessage } from '../../utils/errorHandler';
 import PageContainer from '../../components/layout/PageContainer';
 import ReportFilter from '../../components/citizen/ReportFilter';
-import ReportList from '../../components/citizen/ReportList';
+import OfficerReportList from '../../components/officer/OfficerReportList';
 import Pagination from '../../components/common/Pagination';
 import Alert from '../../components/common/Alert';
 
@@ -77,8 +77,8 @@ const OfficerReportsPage = () => {
         <ReportFilter filters={filters} onFilterChange={setFilter} />
       </div>
 
-      {/* Reports list */}
-      <ReportList reports={reports} loading={loading} />
+      {/* Reports list - CHANGED TO USE OfficerReportList */}
+      <OfficerReportList reports={reports} loading={loading} />
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
