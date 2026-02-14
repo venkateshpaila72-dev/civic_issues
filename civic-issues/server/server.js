@@ -27,13 +27,6 @@ const startServer = async () => {
     
     logger.success('Environment configuration validated');
 
-    // Validate Firebase configuration
-    logger.info('Validating Firebase configuration...');
-    if (!validateFirebaseConfig()) {
-      logger.error('Firebase configuration validation failed');
-      process.exit(1);
-    }
-    logger.success('Firebase configuration validated');
 
     // Validate Cloudinary configuration
     logger.info('Validating Cloudinary configuration...');
