@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
+    "build": "npm run build",
     "seed": "node utils/seedData.js"
+    
   },
   "keywords": [
     "civic",
