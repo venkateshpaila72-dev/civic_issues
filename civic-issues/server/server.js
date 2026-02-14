@@ -7,7 +7,6 @@ const app = require('./app');
 const connectDB = require('./config/database');
 const logger = require('./utils/logger');
 const { validateConfig } = require('./config/config');
-const { validateFirebaseConfig } = require('./config/firebase');
 const { validateCloudinaryConfig, testCloudinaryConnection } = require('./config/cloudinary');
 
 const PORT = process.env.PORT || 5000;
